@@ -1,98 +1,17 @@
-import { useState } from 'react';
-import './App.css';
+import React, { useState } from 'react';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
+import Validation from './Validation/validation';
+
+import './App.css';
 
 const App = () => {
-  const [showMain2, setShowMain2] = useState(false);
-
-  const [login, setLogin] = useState('');
-  const [pass, setPass] = useState('');
-
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPass, setRegisterPass] = useState('');
-
-  const [loginErr, setLoginErr] = useState('');
-  const [passErr, setPassErr] = useState('');
-  const [nameErr, setNameErr] = useState('');
-  const [emailErr, setEmailErr] = useState('');
-
   const [showPass, setShowPass] = useState(false);
-
-  const [users, setUsers] = useState([]);
 
   const togglePassword = () => {
     setShowPass(!showPass);
-  };
-
-  const sendForm = (e) => {
-    e.preventDefault();
-    let valid = true;
-
-    if (!login.trim()) {
-      setLoginErr('Login is required!');
-      valid = false;
-    } else {
-      setLoginErr('');
-    }
-
-    if (!pass.trim()) {
-      setPassErr('Password is required!');
-      valid = false;
-    } else {
-      setPassErr('');
-    }
-
-    if (valid) {
-      alert("Logged in!");
-    }
-  };
-
-  const validateRegistration = () => {
-    let valid = true;
-
-    const nameRegex = /^[A-Z][a-zA-Z]*$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!nameRegex.test(registerName)) {
-      setNameErr('Name must start with a capital letter!');
-      valid = false;
-    } else {
-      setNameErr('');
-    }
-
-    if (!emailRegex.test(registerEmail)) {
-      setEmailErr('Invalid email!');
-      valid = false;
-    } else if (users.some(user => user.email === registerEmail.toLowerCase())) {
-      setEmailErr('Email already exists!');
-      valid = false;
-    } else {
-      setEmailErr('');
-    }
-
-    if (!registerPass.trim()) {
-      setPassErr('Password is required!');
-      valid = false;
-    } else {
-      setPassErr('');
-    }
-
-    if (valid) {
-      const newUser = {
-        name: registerName,
-        email: registerEmail.toLowerCase(),
-        pass: registerPass
-      };
-
-      setUsers(prev => [...prev, newUser]);
-
-      setRegisterName('');
-      setRegisterEmail('');
-      setRegisterPass('');
-      alert('Registered successfully!');
-    }
   };
 
   return (
@@ -104,97 +23,58 @@ const App = () => {
         </h2>
       </div>
 
-      <div className='form-area'>
-        <form onSubmit={sendForm} className='form-box'>
-          <input
-            type='text'
-            placeholder='Email or phone number'
-            value={login}
-            onChange={(e) => {
-              setLogin(e.target.value);
-              setLoginErr('');
-            }}
-          />
-          {loginErr && <p className='error'>{loginErr}</p>}
-
-          <div className='password-box'>
-            <input
-              type={showPass ? 'text' : 'password'}
-              placeholder='Passcode'
-              value={pass}
-              onChange={(e) => {
-                setPass(e.target.value);
-                setPassErr('');
-              }}
-            />
-            {showPass ? (
-              <IoEyeSharp className='eye-icon' onClick={togglePassword} />
-            ) : (
-              <FaEyeSlash className='eye-icon' onClick={togglePassword} />
-            )}
-          </div>
-          {passErr && <p className='error'>{passErr}</p>}
-
-          <button className='enter' type='submit'>Enter</button>
-          <button type='button' className='create-new-acc' onClick={() => setShowMain2(true)}>
-            Create new account
-          </button>
-        </form>
-
-        {showMain2 && (
-          <div className='form-box register-box'>
+      <Formik
+        initialValues={{
+          login: '',
+          email: '',
+          password: '',
+        }}
+        validationSchema={Validation}
+        onSubmit={(values) => {
+          alert('Form submitted!');
+          console.log(values);
+        }}
+      >
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
+          <form onSubmit={handleSubmit} className='form-box'>
             <input
               type='text'
-              placeholder='Enter your name'
-              value={registerName}
-              onChange={(e) => {
-                setRegisterName(e.target.value);
-                setNameErr('');
-              }}
+              name='login'
+              placeholder='Login'
+              value={values.login}
+              onChange={handleChange}
             />
-            {nameErr && <p className='error'>{nameErr}</p>}
-
-            <input
-              type='password'
-              placeholder='Enter your passcode'
-              value={registerPass}
-              onChange={(e) => {
-                setRegisterPass(e.target.value);
-                setPassErr('');
-              }}
-            />
-            {passErr && <p className='error'>{passErr}</p>}
+            {errors.login && touched.login && <p className='error'>{errors.login}</p>}
 
             <input
               type='email'
-              placeholder='Enter your email'
-              value={registerEmail}
-              onChange={(e) => {
-                setRegisterEmail(e.target.value);
-                setEmailErr('');
-              }}
+              name='email'
+              placeholder='Email'
+              value={values.email}
+              onChange={handleChange}
             />
-            {emailErr && <p className='error'>{emailErr}</p>}
+            {errors.email && touched.email && <p className='error'>{errors.email}</p>}
 
-            <button className='enter' onClick={validateRegistration}>Register</button>
-          </div>
-        )}
-      </div>
+            <div className='password-box'>
+              <input
+                type={showPass ? 'text' : 'password'}
+                name='password'
+                placeholder='Password'
+                value={values.password}
+                onChange={handleChange}
+              />
+              {showPass ? (
+                <IoEyeSharp className='eye-icon' onClick={togglePassword} />
+              ) : (
+                <FaEyeSlash className='eye-icon' onClick={togglePassword} />
+              )}
+            </div>
+            {errors.password && touched.password && <p className='error'>{errors.password}</p>}
 
-      <div className='user-list'>
-        <h3>Registered Users:</h3>
-        {users.length === 0 ? (
-          <p>No users registered</p>
-        ) : (
-          <ul>
-            {users.map((user, index) => (
-              <li key={index}>
-                <strong>{user.name}</strong>  {user.email}
-              </li>
-            ))}
-          </ul>
+            <button className='enter' type='submit'>Enter</button>
+          </form>
         )}
-      </div>
+      </Formik>
     </div>
   );
 };
