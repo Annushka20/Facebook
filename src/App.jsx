@@ -49,10 +49,12 @@ const App = () => {
                 name="password"
                 type={showPass ? "text" : "password"}
               />
+
+              
               <ErrorMessage name="password" />
 
               {showPass ? (
-        git         <IoEyeSharp className="eye-icon" onClick={togglePassword} />
+                <IoEyeSharp className="eye-icon" onClick={togglePassword} />
               ) : (
                 <FaEyeSlash className="eye-icon" onClick={togglePassword} />
               )}
